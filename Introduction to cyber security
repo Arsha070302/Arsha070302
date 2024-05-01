@@ -1,0 +1,252 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "toc_visible": true,
+      "authorship_tag": "ABX9TyN/d/wwcZe+qPkTn10WSkOR",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/Arsha070302/Arsha070302/blob/main/Introduction%20to%20cyber%20security\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "1. Symmetric encryption algorithm:\n",
+        "In this algorithm the encryption and decryption keys are identical and easily compute one key from another.That is,secure communication is shared between the sender and reciever to secure the communication channel.\n",
+        "There are two types,they are Block cipher and Stream cipher.\n",
+        "A)Block cipher operates on fixed-length group of bits called blocks.The input data is divided into into fixed-size blocks which are encrypted or decrypted using a secret key.\n",
+        "B)Stream cipher,the plaintext data is divided into individual bits or bytes,each bit or byte is combined with the corresponding bit or byte of the keystream using an XOR operation.The resulting ciphertext is then transmitted or stored.\n",
+        "\n",
+        "Block Cipher is classified into two algorithms,they are AES(Advanced Encryption Standard) and DES (Data Encryption Standard).\n",
+        "\n",
+        "Advanced Encryption Standard:  The AES (Advanced Encryption Standard) algorithm is a symmetric-key block cipher that makes use of fixed-size plaintext blocks. The technique operates by doing repeated rounds of particular operations on the plaintext, eventually transforming it into encrypted text. Here's a full description of how the AES algorithm operates:\n",
+        "\n",
+        "Input and Key Expansion:\n",
+        "The AES algorithm accepts a plaintext block of 128 bits (16 bytes) and a key of 128, 192, or 256 bits as inputs.\n",
+        "The key undergoes key expansion to produce a set of round keys, one for each round of encryption.\n",
+        "\n",
+        "AES's major rounds are four methods repeated a set number of times (10, 12, or 14 depending on key size). The operations are:\n",
+        "a. SubBytes (Substitution): Each byte in the input block is replaced with a value from an initial substitution table (S-Box-Substitution Box). This nonlinear replacement causes confusion and complicates the link between the plaintext and the ciphertext.\n",
+        "b. ShiftRows (Transposition): The rows of the input block are shifted cyclically to the left by a set number of positions. This procedure introduces diffusion by distributing the influence of each byte over numerous output bytes.\n",
+        "c. MixColumns: Each column of the input block is considered as a polynomial over a finite field, multiplied by A fixed polynomial modulo another fixed polynomial. This linear process increases dispersion by spreading the effect of each input byte over several output bytes.\n",
+        "d. AddRoundKey. The result of the previous phase is XORed with the round key for that particular round. This step adds the secret key to the process of encryption.\n",
+        "Final Round:Following the major rounds, a slightly altered final round is run, omitting the MixColumns procedure.\n",
+        "The result of this third round is the ciphertext block.\n",
+        "\n",
+        "\n",
+        "Data Encryption Standard :\n",
+        "DES algorithm divides the input block into two halves and applies multiple rounds of operations to them.Each round consists of\n",
+        "Expansion : Using an expansion permutation, the 32-bit right half of the input block is extended to 48 bits.\n",
+        "Key Mixing: An XOR technique is used to mix the expanded right side with a 48-bit round key that is obtained from the primary encryption key.\n",
+        "Substitution: After the key mixing stage, the output is split up into eight 6-bit blocks. An S-box (substitution box) is used to replace each block.\n",
+        "Permutation: A predetermined permutation table is used to permute the replaced values.\n",
+        "XOR: The left half of the input block is XORed with the permuted result.\n",
+        "Swap: The input block's left and right halves are switched.\n",
+        "\n",
+        "For sixteen rounds, these actions are repeated, and each round uses a new round key. Following round sixteen, the left and right halves are swapped again and combined to form the ciphertext.\n",
+        "Although DES is considered as a powerful encryption technique.It has some security flaws therefore it is not recommendable"
+      ],
+      "metadata": {
+        "id": "OpKGXABG-n9e"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "!pip install pycryptodome\n",
+        "from Crypto.Cipher import AES\n",
+        "from Crypto.Random import get_random_bytes\n",
+        "\n",
+        "def encrypt_ctr(plaintext, key):\n",
+        "    cipher = AES.new(key, AES.MODE_CTR)\n",
+        "    nonce = cipher.nonce\n",
+        "    ciphertext = cipher.encrypt(plaintext)\n",
+        "    return ciphertext, nonce\n",
+        "\n",
+        "def decrypt_ctr(ciphertext, key, nonce):\n",
+        "    cipher = AES.new(key, AES.MODE_CTR, nonce=nonce)\n",
+        "    plaintext = cipher.decrypt(ciphertext)\n",
+        "    return plaintext\n",
+        "\n",
+        "def encrypt_cfb(plaintext, key):\n",
+        "    cipher = AES.new(key, AES.MODE_CFB)\n",
+        "    iv = get_random_bytes(AES.block_size)\n",
+        "    ciphertext = iv + cipher.encrypt(plaintext)\n",
+        "    return ciphertext\n",
+        "\n",
+        "def decrypt_cfb(ciphertext, key):\n",
+        "    iv = ciphertext[:AES.block_size]\n",
+        "    cipher = AES.new(key, AES.MODE_CFB, iv=iv)\n",
+        "    plaintext = cipher.decrypt(ciphertext[AES.block_size:])\n",
+        "    return plaintext\n",
+        "key = get_random_bytes(16)\n",
+        "plaintext = b\"Hi,my dear friend!\"\n",
+        "ciphertext_ctr, nonce = encrypt_ctr(plaintext, key)\n",
+        "decrypted_text_ctr = decrypt_ctr(ciphertext_ctr, key, nonce)\n",
+        "\n",
+        "print(\"Counter Mode (CTR):\")\n",
+        "print(\"Plaintext:\", plaintext)\n",
+        "print(\"Ciphertext:\", ciphertext_ctr)\n",
+        "print(\"Decrypted text:\", decrypted_text_ctr)\n",
+        "key = get_random_bytes(16)\n",
+        "plaintext = b\"Hi,my dear friend!\"\n",
+        "ciphertext_cfb = encrypt_cfb(plaintext, key)\n",
+        "decrypted_text_cfb = decrypt_cfb(ciphertext_cfb, key)\n",
+        "\n",
+        "print(\"\\nCipher Feedback Mode (CFB):\")\n",
+        "print(\"Plaintext:\", plaintext)\n",
+        "print(\"Ciphertext:\", ciphertext_cfb)\n",
+        "print(\"Decrypted text:\", decrypted_text_cfb)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "1Wa1mhnXIL-h",
+        "outputId": "9c42f5bf-e143-4d95-c7a8-b2d5900dce07"
+      },
+      "execution_count": 3,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Collecting pycryptodome\n",
+            "  Downloading pycryptodome-3.20.0-cp35-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)\n",
+            "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m2.1/2.1 MB\u001b[0m \u001b[31m9.4 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hInstalling collected packages: pycryptodome\n",
+            "Successfully installed pycryptodome-3.20.0\n",
+            "Counter Mode (CTR):\n",
+            "Plaintext: b'Hi,my dear friend!'\n",
+            "Ciphertext: b'Sq\\xb3\\x99g\\xc2\\xeb\\x83\\x1b!\\xf0\\xe5v\\xd7lR>\\x15'\n",
+            "Decrypted text: b'Hi,my dear friend!'\n",
+            "\n",
+            "Cipher Feedback Mode (CFB):\n",
+            "Plaintext: b'Hi,my dear friend!'\n",
+            "Ciphertext: b'\\xcd\\x9a\\xd3\\x03\\xa1\\xeb>\\xb3\\x14J\\xa6&C\\xdd\\x04\\xf5\\x986\\x0b\\x85\\x1a\\xda \\xd9\\x99\\x12\\xf4\\x84)\\xe7,r\\xa3\\xb8'\n",
+            "Decrypted text: b'\\xa4\\xe3\\x9f<\\x7f\\xec\\x8a Hl%\\\\\\x17\\xfc\\x11\\xa0d!'\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "2.Asymmetric encryption algorithm: It is also known as public-key cryptgraphy,it uses a pair of keys for encryption and decrytion.These keys are not identical and one cannot be easily compute from other without some additional information.The two keys are public key,which is intended to shar with anyone who wishes to send encrypted messages to the owner of the key.It is didttributed and is used for encryption.The other key is private key,which is kept secret by the owner and is used for decrypting messages that were encrypted using the corresponding pubic key,it shouldn't be shared with anyone else.\n",
+        "Two types of asymmetric algorithm is RSA and Diffie Hellman.\n",
+        " a)RSA(Rivesr-Shamir-Adleman):\n",
+        " It is the widely used encryption algorithm.It relies on mathematical properties of large prime numbers and modular arithmetic.\n",
+        " 1)Key Generation : choose two distinct large prime numbers,p and q.\n",
+        " Take the prodcut of p and q where it is the modulus for both the public and private keys,n=p x q.\n",
+        " Using Euler's totient function ϕ(n)=(p−1)×(q−1), where\n",
+        " is Euler's totient function.\n",
+        " Choose an integer e such that 1<e<ϕ(n)  and e is coprime with ϕ(n) ,which means\n",
+        " gcd(e,ϕ(n))=1.\n",
+        " Calculate the private exponent d such that  \n",
+        " 𝑑 x e ≡ 1 mod ϕ(n),where d is the modular multiplicative inverse of e modulo ϕ(n).\n",
+        "2)Encryption : Let M is the message or plain text to be encrypted,where M is less than n,C≡Me modn.\n",
+        "3)Decryption : To decrypt the cipher tex, C by using\n",
+        "M≡Cd modn.\n",
+        "\n",
+        "b)Diffie Hellman is a key exchange algorithm is a method for securely exchanging cryptographic keys over an insecure communication channel.It allows two parties to establish a shared key that can be  used for encryption and decryption.The working  is\n",
+        "Agree on public parameters:\n",
+        "\n",
+        "Both parties agree on two public parameters: a large prime number p and a base g (a primitive root modulo p).\n",
+        "\n",
+        "\n",
+        "Generate private keys:\n",
+        "\n",
+        "Party A chooses a private key a, which is a random integer.\n",
+        "Party B chooses a private key b, which is a random integer.\n",
+        "\n",
+        "Generate public keys:\n",
+        "Party A computes their public key A = g^a mod p.\n",
+        "Party B computes their public key B = g^b mod p.\n",
+        "\n",
+        "Exchange public keys:\n",
+        "Party A sends their public key A to Party B.\n",
+        "Party B sends their public key B to Party A.\n",
+        "\n",
+        "\n",
+        "Derive shared secret key:\n",
+        "Party A computes the shared secret key K = B^a mod p.\n",
+        "Party B computes the shared secret key K = A^b mod p.\n",
+        "In  Diffie hellman algorithm both the parties sharing the same secret key,even though they never exchanged their private keys a and b over the communication channel.\n"
+      ],
+      "metadata": {
+        "id": "76PIczvO1RzL"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [],
+      "metadata": {
+        "id": "972sqPao7S-X"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "3.Hash function: It is a mathematical function that takes an input or message and produces a fixed size of bytes of string which is hexadecimal number.Its working is:\n",
+        "1)Input a data which can be a string,file etc.\n",
+        "2)Processing: The hash function process the input using a specific algorithm.This algorithm takes the input and transform it into a unique fixed size output called hash value. For the given input the hash function wil always produce the same output that is the hash function is deterministic.\n",
+        "\n"
+      ],
+      "metadata": {
+        "id": "Lcjr3F0kJp3c"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "def hash_function(string):\n",
+        "    hash_value = 0\n",
+        "    for char in string:\n",
+        "        hash_value ^= ord(char)\n",
+        "\n",
+        "    return hash_value\n",
+        "input_string = \"You are so beautiful\"\n",
+        "hash_value = hash_function(input_string)\n",
+        "print(f\"The hash of '{input_string}' is: {hash_value}\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "4wSx35h9aa_2",
+        "outputId": "1fc6e511-b389-4062-b832-52712206594b"
+      },
+      "execution_count": 4,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "The hash of 'You are so beautiful' is: 120\n"
+          ]
+        }
+      ]
+    }
+  ]
+}
